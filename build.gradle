@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'ru.hits.trb'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
     sourceCompatibility = '21'
@@ -16,5 +16,12 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-data-jdbc"
+
+    implementation "org.postgresql:postgresql:${postgreSqlDriverVersion}"
+    implementation "org.flywaydb:flyway-core:${flywayCoreVersion}"
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }

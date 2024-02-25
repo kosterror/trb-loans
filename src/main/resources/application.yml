@@ -1,1 +1,9 @@
-
+spring:
+  application:
+    name: trb-loans
+  datasource:
+    url: jdbc:postgresql://trb-loans-db:5432/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  flyway:
+    locations: migrations

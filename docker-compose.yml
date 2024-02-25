@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  trb-loans-back:
+    container_name: trb-loans-back
+    build: ./
+    ports:
+      - "8081:8080"
+    depends_on:
+      - trb-loans-db
+    env_file:
+      - .env
+  trb-loans-db:
+    container_name: trb-loans-db
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5431:5432"
+    volumes:
+      - trb-loans-db:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+volumes:
+  trb-loans-db: { }
