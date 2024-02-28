@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5401/trb-loans
+    username: trb-loans
+    password: trb-loans

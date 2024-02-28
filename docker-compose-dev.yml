@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  trb-loans-db-dev:
+    container_name: trb-loans-db-dev
+    image: postgres:15
+    environment:
+      POSTGRES_DB: trb-loans
+      POSTGRES_USER: trb-loans
+      POSTGRES_PASSWORD: trb-loans
+    ports:
+      - "5401:5432"
+    volumes:
+      - trb-loans-db-dev:/var/lib/postgresql/data
+
+volumes:
+  trb-loans-db-dev: { }
