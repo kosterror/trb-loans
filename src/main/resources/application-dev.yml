@@ -3,3 +3,8 @@ spring:
     url: jdbc:postgresql://localhost:5401/trb-loans
     username: trb-loans
     password: trb-loans
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
