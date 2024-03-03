@@ -37,6 +37,10 @@ public class LoanEntity {
 
     private int loanTermInDays;
 
+    private UUID clientId;
+
+    private UUID accountId;
+
     @Enumerated(EnumType.ORDINAL)
     private LoanState state;
 

@@ -31,6 +31,8 @@ public class TariffEntity {
 
     private BigDecimal interestRate;
 
+    private UUID officerId;
+
     @OneToMany(mappedBy = "tariff")
     private List<LoanEntity> issuedLoans;
 

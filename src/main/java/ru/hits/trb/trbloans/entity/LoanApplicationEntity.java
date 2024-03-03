@@ -24,9 +24,15 @@ public class LoanApplicationEntity {
 
     private Date creationDate;
 
+    private Date updatedDateFinal;
+
     private int loanTermInDays;
 
     private long issuedAmount;
+
+    private UUID clientId;
+
+    private UUID officerId;
 
     @Enumerated(EnumType.ORDINAL)
     private LoanApplicationState state;
