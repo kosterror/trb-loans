@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.NOT_REQUIRED;
@@ -20,8 +21,8 @@ public class ErrorResponse {
     private String message;
 
     @Schema(requiredMode = NOT_REQUIRED,
-            description = "Слова с информацией о нарушении валидации, " +
+            description = "Информация о нарушении валидации, " +
                     "ключ - параметр тела запроса, значение - описание нарушения")
-    private Map<String, String> requestValidationMessages;
+    private Map<String, List<String>> requestValidationMessages;
 
 }
