@@ -19,7 +19,6 @@ create table loan_application
     tariff_id          uuid      not null,
     client_id          uuid      not null,
     officer_id         uuid,
-    account_id         uuid      not null,
     foreign key (tariff_id) references tariff (id) on delete restrict on update restrict
 );
 

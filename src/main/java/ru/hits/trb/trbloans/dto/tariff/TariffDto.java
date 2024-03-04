@@ -1,5 +1,6 @@
 package ru.hits.trb.trbloans.dto.tariff;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class TariffDto {
     @Schema(description = "Идентификатор тарифа", requiredMode = REQUIRED)
     private UUID id;
 
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     @Schema(description = "Дата создания тарифа",
             requiredMode = REQUIRED,
             example = "1709372199882",

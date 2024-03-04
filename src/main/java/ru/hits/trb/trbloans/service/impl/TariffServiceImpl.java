@@ -5,9 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.hits.trb.trbloans.dto.tariff.NewTariffDto;
 import ru.hits.trb.trbloans.dto.tariff.TariffDto;
+import ru.hits.trb.trbloans.entity.TariffEntity;
+import ru.hits.trb.trbloans.exception.NotFoundException;
 import ru.hits.trb.trbloans.mapper.TariffMapper;
 import ru.hits.trb.trbloans.repository.TariffRepository;
 import ru.hits.trb.trbloans.service.TariffService;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -23,6 +27,13 @@ public class TariffServiceImpl implements TariffService {
         tariff = tariffRepository.save(tariff);
         log.info("Tariff created with id {}", tariff.getId());
         return tariffMapper.entityToDto(tariff);
+    }
+
+    @Override
+    public TariffEntity findTariff(UUID id) {
+        return tariffRepository
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException("Tariff with id '" + id + "' not found"));
     }
 
 }

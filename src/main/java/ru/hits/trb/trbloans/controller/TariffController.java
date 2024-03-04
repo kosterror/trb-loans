@@ -11,7 +11,7 @@ import ru.hits.trb.trbloans.dto.tariff.TariffDto;
 import ru.hits.trb.trbloans.service.TariffService;
 
 @RestController
-@RequestMapping("/api/tariff")
+@RequestMapping("/api/v1/tariff")
 @RequiredArgsConstructor
 public class TariffController {
 
