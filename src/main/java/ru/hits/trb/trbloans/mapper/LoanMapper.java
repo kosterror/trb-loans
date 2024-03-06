@@ -1,17 +1,29 @@
 package ru.hits.trb.trbloans.mapper;
 
 
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
 import ru.hits.trb.trbloans.dto.loan.LoanDto;
+import ru.hits.trb.trbloans.entity.LoanApplicationEntity;
 import ru.hits.trb.trbloans.entity.LoanEntity;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
-)
-public interface LoanMapper {
+public class LoanMapper {
 
-    LoanDto mapEntityToDto(LoanEntity entity);
+    LoanDto mapEntityToDto(LoanEntity entity){
+        return  null;
+    }
+     LoanEntity mapLoanEntity(LoanApplicationEntity loanApplication){
+         return LoanEntity
+                 .builder()
+                 .amountLoan(calculateAmountLoan())
+                 .loanTermInDays(loanApplication.getLoanTermInDays())
+                 .clientId(loanApplication.getClientId())
+                 .issuedAmount(loanApplication.getIssuedAmount())
+                 .tariff(loanApplication.getTariff())
+                 .issuedDate(loanApplication.getCreationDate())
+                 .build();
+    }
+
+    private long calculateAmountLoan(){
+        return 0;
+    }
+
 }

@@ -23,4 +23,6 @@ public class LoanController {
     public List<LoanDto> getClientLoans(@Valid @RequestParam UUID clientId) {
         return loanService.getLoans(clientId);
     }
+
+
 }
