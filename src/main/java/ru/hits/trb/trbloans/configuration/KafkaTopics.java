@@ -11,4 +11,6 @@ public class KafkaTopics {
 
     private String loanRepayment;
 
+    private String loanPayment;
+
 }

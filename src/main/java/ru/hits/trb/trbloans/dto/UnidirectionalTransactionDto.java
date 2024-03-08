@@ -1,4 +1,4 @@
-package ru.hits.trb.trbloans.dto.loanapplication;
+package ru.hits.trb.trbloans.dto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class LoanRepaymentTransaction {
+public class UnidirectionalTransactionDto {
 
     private UUID accountId;
 

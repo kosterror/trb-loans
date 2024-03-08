@@ -19,3 +19,4 @@ spring:
 kafka:
   topic:
     loan-repayment: "transaction.loan-repayment"
+    loan-payment: "transaction.loan-payment"
