@@ -1,5 +1,6 @@
 package ru.hits.trb.trbloans.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ public class LoanController {
 
     private final LoanService loanService;
 
+    @Operation(summary = "Получить кредиты клиента")
     @GetMapping
     public List<LoanDto> getClientLoans(@Valid @RequestParam UUID clientId) {
         return loanService.getLoans(clientId);

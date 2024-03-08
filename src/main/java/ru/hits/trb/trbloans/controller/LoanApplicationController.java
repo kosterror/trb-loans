@@ -1,5 +1,6 @@
 package ru.hits.trb.trbloans.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,26 +20,31 @@ public class LoanApplicationController {
 
     private final LoanApplicationService service;
 
+    @Operation(summary = "Создать заявку на кредит")
     @PostMapping
     public LoanApplicationDto createLoanApplication(@Valid @RequestBody NewLoanApplicationDto dto) {
         return service.createLoanApplication(dto);
     }
 
+    @Operation(summary = "Одобрить заявку на кредит")
     @PostMapping("{id}/approve")
     public LoanDto approveLoanApplication(@PathVariable UUID id) {
         return service.approveLoanApplication(id);
     }
 
+    @Operation(summary = "Отклонить заявку на кредит")
     @PostMapping("{id}/reject")
     public LoanApplicationDto rejectLoanApplication(@PathVariable UUID id) {
         return service.rejectLoanApplication(id);
     }
 
+    @Operation(summary = "Получить заявки клиента на кредит")
     @GetMapping("/by-client")
     public List<LoanApplicationDto> getClientLoanApplications(@RequestParam UUID clientId, @RequestParam LoanApplicationState loanApplicationState){
         return service.getClientLoanApplications(clientId, loanApplicationState);
     }
 
+    @Operation(summary = "Получить все заявки на кредит")
    @GetMapping
     public List<LoanApplicationDto> getLoanApplications(@RequestParam LoanApplicationState loanApplicationState){
         return service.getLoanApplications(loanApplicationState);

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.hits.trb.trbloans.dto.loan.LoanDto;
 import ru.hits.trb.trbloans.entity.LoanEntity;
-import ru.hits.trb.trbloans.mapper.LoanMapper;
 import ru.hits.trb.trbloans.repository.LoanRepository;
 import ru.hits.trb.trbloans.service.LoanService;
 
@@ -21,7 +20,7 @@ public class LoanServiceImpl implements LoanService {
 
     private final LoanRepository loanRepository;
 
-    private final LoanMapper loanMapper;
+    //private final LoanMapper loanMapper;
 
     @Override
     public List<LoanDto> getLoans(UUID clientId) {
@@ -30,9 +29,9 @@ public class LoanServiceImpl implements LoanService {
 
         List<LoanDto> loanDtos = new ArrayList<>();
 
-        for (LoanEntity loan : loanEntityList) {
-            loanDtos.add(loanMapper.mapEntityToDto(loan));
-        }
+//        for (LoanEntity loan : loanEntityList) {
+//            loanDtos.add(loanMapper.mapEntityToDto(loan));
+//        }
 
         return loanDtos;
     }
