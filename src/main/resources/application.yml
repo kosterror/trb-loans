@@ -13,3 +13,10 @@ spring:
     show-sql: false
   flyway:
     locations: migrations
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS}
+
+kafka:
+  topic:
+    loan-repayment: "transaction.loan-repayment"
+    loan-payment: "transaction.loan-payment"
