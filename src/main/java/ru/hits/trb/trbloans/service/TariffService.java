@@ -4,6 +4,7 @@ import ru.hits.trb.trbloans.dto.tariff.NewTariffDto;
 import ru.hits.trb.trbloans.dto.tariff.TariffDto;
 import ru.hits.trb.trbloans.entity.TariffEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface TariffService {
@@ -11,4 +12,6 @@ public interface TariffService {
     TariffDto createTariff(NewTariffDto dto);
 
     TariffEntity findTariff(UUID id);
+
+    List<TariffDto> getTariffs();
 }

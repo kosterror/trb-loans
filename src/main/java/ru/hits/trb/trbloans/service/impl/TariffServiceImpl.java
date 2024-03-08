@@ -11,6 +11,8 @@ import ru.hits.trb.trbloans.mapper.TariffMapper;
 import ru.hits.trb.trbloans.repository.TariffRepository;
 import ru.hits.trb.trbloans.service.TariffService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -34,6 +36,18 @@ public class TariffServiceImpl implements TariffService {
         return tariffRepository
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException("Tariff with id '" + id + "' not found"));
+    }
+
+    public List<TariffDto> getTariffs() {
+
+        List<TariffEntity> tariffEntities = tariffRepository.findAll();
+
+        List<TariffDto> tariffDtos = new ArrayList<>();
+
+        for (TariffEntity tariff : tariffEntities) {
+            tariffDtos.add(tariffMapper.entityToDto(tariff));
+        }
+        return tariffDtos;
     }
 
 }
