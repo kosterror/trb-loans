@@ -1,7 +1,5 @@
 package ru.hits.trb.trbloans.dto.loan;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Data;
 import ru.hits.trb.trbloans.dto.tariff.TariffDto;
 import ru.hits.trb.trbloans.entity.enumeration.LoanState;
@@ -34,11 +32,10 @@ public class LoanDto {
 
     private UUID accountId;
 
-    @Enumerated(EnumType.ORDINAL)
     private LoanState state;
 
     private TariffDto tariff;
 
-    private List<LoanPaymentDto> payments;
+    private List<LoanRepaymentDto> repayments;
 
 }

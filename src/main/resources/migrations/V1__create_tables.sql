@@ -41,7 +41,7 @@ create table loan
     foreign key (loan_application_id) references loan_application (id) on delete restrict on update restrict
 );
 
-create table loan_payment
+create table loan_repayment
 (
     id      uuid primary key,
     date    timestamp not null,

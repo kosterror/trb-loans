@@ -1,7 +1,8 @@
 package ru.hits.trb.trbloans.entity.enumeration;
 
-public enum LoanPaymentState {
+public enum LoanRepaymentState {
     OPEN,
     IN_PROGRESS,
-    DONE
+    DONE,
+    REJECTED
 }

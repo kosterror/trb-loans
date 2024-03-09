@@ -21,12 +21,12 @@ public class LoanRepaymentProducer {
     private final ObjectMapper objectMapper;
     private final KafkaTopics topics;
 
-    public void sendMessage(UUID loanPaymentId, UnidirectionalTransactionDto transactionDto) {
+    public void sendMessage(UUID loanRepaymentId, UnidirectionalTransactionDto transactionDto) {
         try {
-            var key = objectMapper.writeValueAsString(loanPaymentId);
+            var key = objectMapper.writeValueAsString(loanRepaymentId);
             var value = objectMapper.writeValueAsString(transactionDto);
 
-            kafkaTemplate.send(topics.getLoanPayment(), key, value);
+            kafkaTemplate.send(topics.getLoanRepayment(), key, value);
 
             log.info("Repayment record sent, id: {}, value {}", key, value);
         } catch (JsonProcessingException exception) {
