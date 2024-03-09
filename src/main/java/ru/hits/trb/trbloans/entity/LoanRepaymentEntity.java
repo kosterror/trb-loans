@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.hits.trb.trbloans.entity.enumeration.LoanPaymentState;
+import ru.hits.trb.trbloans.entity.enumeration.LoanRepaymentState;
 
 import java.util.Date;
 import java.util.UUID;
@@ -15,8 +15,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "loan_payment")
-public class LoanPayment {
+@Table(name = "loan_repayment")
+public class LoanRepaymentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -27,7 +27,7 @@ public class LoanPayment {
     private long amount;
 
     @Enumerated(EnumType.ORDINAL)
-    private LoanPaymentState state;
+    private LoanRepaymentState state;
 
     @ManyToOne
     private LoanEntity loan;

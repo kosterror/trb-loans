@@ -48,7 +48,7 @@ public class LoanEntity {
     private TariffEntity tariff;
 
     @OneToMany(mappedBy = "loan")
-    private List<LoanPayment> payments;
+    private List<LoanRepaymentEntity> repayments;
 
     @OneToOne
     @JoinColumn(name = "loan_application_id", referencedColumnName = "id")
