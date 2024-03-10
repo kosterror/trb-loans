@@ -28,7 +28,7 @@ public class LoanController {
     }
     @Operation(summary = "Получить все незакрытые кредиты")
     @GetMapping("/loan")
-    public Page<ShortLoanDto> getLoans(@RequestBody @Valid PageDto pageDto) {
+    public Page<ShortLoanDto> getLoans( @Valid @RequestBody PageDto pageDto) {
 
         return loanService.getLoans(pageDto);
     }
