@@ -34,3 +34,8 @@ kafka:
 urls:
   core: ${CORE_URL}
   users: ${USERS_URL}
+
+scheduler:
+  loan-repayment-send-transaction: "0 0 18 * * *"
+  loan-repayment-update-status: "0 0 */6 * * *"
+  loan-repayment-calculate-penny: "0 0 1 * * *"

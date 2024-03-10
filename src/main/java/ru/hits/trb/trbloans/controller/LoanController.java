@@ -23,20 +23,17 @@ public class LoanController {
     @Operation(summary = "Получить кредиты клиента")
     @GetMapping("/client-loans")
     public List<ShortLoanDto> getClientLoans(@Valid @RequestParam UUID clientId) {
-
         return loanService.getClientLoans(clientId);
     }
     @Operation(summary = "Получить все незакрытые кредиты")
     @GetMapping("/loan")
     public Page<ShortLoanDto> getLoans(@Valid @RequestBody PageDto pageDto) {
-
         return loanService.getLoans(pageDto);
     }
 
     @Operation(summary = "Получить детальную информацию по кредиту.")
     @GetMapping("/loan/{loanId}")
     public LoanDto getLoan(@Valid @PathVariable UUID loanId) {
-
         return loanService.getLoan(loanId);
     }
 

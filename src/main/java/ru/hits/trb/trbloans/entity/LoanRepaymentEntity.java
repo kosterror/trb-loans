@@ -24,6 +24,8 @@ public class LoanRepaymentEntity {
 
     private Date date;
 
+    private Date dateOfLastTransaction;
+
     private long amount;
 
     @Enumerated(EnumType.ORDINAL)

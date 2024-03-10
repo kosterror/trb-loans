@@ -16,3 +16,8 @@ spring:
 urls:
   core: http://localhost:8080/
   users: http://localhost:8082/
+
+scheduler:
+  loan-repayment-send-transaction: "1 * * * * *"
+  loan-repayment-calculate-penny: "1 * * * * *"
+  loan-repayment-update-status: "1 * * * * *"

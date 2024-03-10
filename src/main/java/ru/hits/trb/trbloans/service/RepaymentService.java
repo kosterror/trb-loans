@@ -8,4 +8,9 @@ public interface RepaymentService {
 
     void processRepaymentCallback(UUID repaymentId, TransactionState state);
 
+    void sendRepaymentTransactions();
+
+    void updateRepaymentsStatus();
+
+    void calculatePenny();
 }
