@@ -43,5 +43,4 @@ public class LoanDto {
     private TariffDto tariff;
 
     private List<LoanRepaymentDto> repayments;
-
 }
