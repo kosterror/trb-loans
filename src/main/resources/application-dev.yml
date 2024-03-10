@@ -12,3 +12,7 @@ spring:
         format_sql: true
   kafka:
     bootstrap-servers: localhost:9000,localhost:9001
+
+urls:
+  core: http://localhost:8080/
+  users: http://localhost:8082/

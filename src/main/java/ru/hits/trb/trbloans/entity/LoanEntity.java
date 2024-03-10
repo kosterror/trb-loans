@@ -47,7 +47,7 @@ public class LoanEntity {
     @ManyToOne
     private TariffEntity tariff;
 
-    @OneToMany(mappedBy = "loan")
+    @OneToMany(mappedBy = "loan", cascade = CascadeType.PERSIST)
     private List<LoanRepaymentEntity> repayments;
 
     @OneToOne

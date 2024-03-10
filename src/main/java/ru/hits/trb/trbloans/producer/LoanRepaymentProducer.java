@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.hits.trb.trbloans.configuration.KafkaTopics;
-import ru.hits.trb.trbloans.controller.exception.InternalServiceException;
 import ru.hits.trb.trbloans.dto.UnidirectionalTransactionDto;
+import ru.hits.trb.trbloans.exception.InternalServiceException;
 
 import java.util.UUID;
 

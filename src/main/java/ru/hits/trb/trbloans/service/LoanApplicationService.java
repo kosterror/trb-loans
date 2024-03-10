@@ -12,9 +12,9 @@ public interface LoanApplicationService {
 
     LoanApplicationDto createLoanApplication(NewLoanApplicationDto dto);
 
-    LoanDto approveLoanApplication(UUID loanApplicationId);
+    LoanDto approveLoanApplication(UUID loanApplicationId, UUID officerId);
 
-    LoanApplicationDto rejectLoanApplication(UUID loanApplicationId);
+    LoanApplicationDto rejectLoanApplication(UUID loanApplicationId, UUID officerId);
 
     List<LoanApplicationDto> getClientLoanApplications(UUID clientId, LoanApplicationState loanApplicationState);
 

@@ -9,8 +9,8 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
-import ru.hits.trb.trbloans.controller.exception.InternalServiceException;
 import ru.hits.trb.trbloans.dto.transaction.TransactionState;
+import ru.hits.trb.trbloans.exception.InternalServiceException;
 import ru.hits.trb.trbloans.service.RepaymentService;
 
 import java.util.UUID;

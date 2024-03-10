@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/loan")
+@RequestMapping("/api/v1/loan")
 @RequiredArgsConstructor
 public class LoanController {
 

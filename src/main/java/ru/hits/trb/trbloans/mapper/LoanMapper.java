@@ -1,34 +1,17 @@
 package ru.hits.trb.trbloans.mapper;
 
-
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ReportingPolicy;
 import ru.hits.trb.trbloans.dto.loan.LoanDto;
-import ru.hits.trb.trbloans.entity.LoanApplicationEntity;
 import ru.hits.trb.trbloans.entity.LoanEntity;
-import ru.hits.trb.trbloans.entity.enumeration.LoanState;
 
-import java.util.UUID;
+@Mapper(
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
+public interface LoanMapper {
 
-public class LoanMapper {
-
-  public   LoanDto mapEntityToDto(LoanEntity entity){
-        return  null;
-    }
-
-     LoanEntity mapLoanEntity(LoanApplicationEntity loanApplication, long amountLoan, UUID accountId){
-
-         return LoanEntity
-                 .builder()
-                 .amountLoan(amountLoan)
-                 .amountDebt(amountLoan)
-                 .accruedPenny(0)
-                 .state(LoanState.OPEN)
-                 .accountId(accountId)
-                 .loanTermInDays(loanApplication.getLoanTermInDays())
-                 .clientId(loanApplication.getClientId())
-                 .issuedAmount(loanApplication.getIssuedAmount())
-                 .tariff(loanApplication.getTariff())
-                 .issuedDate(loanApplication.getCreationDate())
-                 .build();
-    }
+    LoanDto entityToDto(LoanEntity entity);
 
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.hits.trb.trbloans.dto.ErrorResponse;
 import ru.hits.trb.trbloans.exception.BadRequestException;
+import ru.hits.trb.trbloans.exception.ConflictException;
 import ru.hits.trb.trbloans.exception.NotFoundException;
 
 import java.util.ArrayList;
@@ -82,6 +83,16 @@ public class ExceptionControllerAdvice {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(buildResponse(ErrorCodes.NOT_FOUND, exception.getMessage()));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflictException(HttpServletRequest request,
+                                                                 ConflictException exception) {
+        logException(request, exception);
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(buildResponse(ErrorCodes.INVALID_ACTION, exception.getMessage()));
     }
 
     private void logException(HttpServletRequest request, Exception exception) {
