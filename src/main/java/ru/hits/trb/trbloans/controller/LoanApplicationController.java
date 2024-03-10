@@ -51,7 +51,7 @@ public class LoanApplicationController {
     public List<LoanApplicationDto> getLoanApplications(@RequestParam LoanApplicationState loanApplicationState) {
         return service.getLoanApplications(loanApplicationState);
     }
- @Operation(summary = "Получить все заявки на кредит")
+ @Operation(summary = "Получить информацию по заявке.")
     @GetMapping("{loanApplicationId}")
     public LoanApplicationDto getLoanApplications(@PathVariable UUID loanApplicationId) {
         return service.getLoanApplication(loanApplicationId);
