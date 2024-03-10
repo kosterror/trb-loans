@@ -3,10 +3,15 @@ package ru.hits.trb.trbloans.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.hits.trb.trbloans.dto.PageDto;
 import ru.hits.trb.trbloans.dto.loan.LoanDto;
 import ru.hits.trb.trbloans.dto.loan.ShortLoanDto;
 import ru.hits.trb.trbloans.entity.LoanEntity;
+import ru.hits.trb.trbloans.entity.enumeration.LoanState;
 import ru.hits.trb.trbloans.exception.NotFoundException;
 import ru.hits.trb.trbloans.mapper.LoanMapper;
 import ru.hits.trb.trbloans.repository.LoanRepository;
@@ -25,12 +30,21 @@ public class LoanServiceImpl implements LoanService {
     private final LoanMapper loanMapper;
 
     @Override
-    public List<ShortLoanDto> getLoans(UUID clientId) {
+    public List<ShortLoanDto> getClientLoans(UUID clientId) {
         return loanRepository.findLoanEntitiesByClientId(clientId)
                 .stream()
                 .map(loanMapper::entityToShortDto)
                 .toList();
     }
+
+    @Override
+    public Page<ShortLoanDto> getLoans(PageDto pageDto) {
+
+        Pageable pageable = createPageable(pageDto);
+        return loanRepository.findAllLoanEntitiesByState(pageable, LoanState.OPEN)
+                .map(loanMapper::entityToShortDto);
+    }
+
     @Override
     public LoanDto getLoan(UUID loanId) {
         LoanEntity loanEntity = loanRepository.findById(loanId)
@@ -39,4 +53,9 @@ public class LoanServiceImpl implements LoanService {
         return loanMapper.entityToDto(loanEntity);
     }
 
+    private Pageable createPageable(PageDto pageDto) {
+        int page = pageDto.getPageNumber();
+        int size = pageDto.getPageSize();
+        return PageRequest.of(page, size);
+    }
 }
