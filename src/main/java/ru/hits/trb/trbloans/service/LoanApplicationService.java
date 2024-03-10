@@ -1,6 +1,6 @@
 package ru.hits.trb.trbloans.service;
 
-import ru.hits.trb.trbloans.dto.loan.LoanDto;
+import ru.hits.trb.trbloans.dto.loanapplication.DecideForApplicationDto;
 import ru.hits.trb.trbloans.dto.loanapplication.LoanApplicationDto;
 import ru.hits.trb.trbloans.dto.loanapplication.NewLoanApplicationDto;
 import ru.hits.trb.trbloans.entity.enumeration.LoanApplicationState;
@@ -12,9 +12,9 @@ public interface LoanApplicationService {
 
     LoanApplicationDto createLoanApplication(NewLoanApplicationDto dto);
 
-    LoanDto approveLoanApplication(UUID loanApplicationId, UUID officerId);
+    LoanApplicationDto approveLoanApplication(DecideForApplicationDto decideForApplicationDto);
 
-    LoanApplicationDto rejectLoanApplication(UUID loanApplicationId, UUID officerId);
+    LoanApplicationDto rejectLoanApplication(DecideForApplicationDto decideForApplicationDto);
 
     List<LoanApplicationDto> getClientLoanApplications(UUID clientId, LoanApplicationState loanApplicationState);
 

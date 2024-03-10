@@ -9,7 +9,7 @@ import ru.hits.trb.trbloans.client.core.dto.AccountDto;
 import ru.hits.trb.trbloans.client.users.UsersClient;
 import ru.hits.trb.trbloans.client.users.dto.ClientDto;
 import ru.hits.trb.trbloans.dto.UnidirectionalTransactionDto;
-import ru.hits.trb.trbloans.dto.loan.LoanDto;
+import ru.hits.trb.trbloans.dto.loanapplication.DecideForApplicationDto;
 import ru.hits.trb.trbloans.dto.loanapplication.LoanApplicationDto;
 import ru.hits.trb.trbloans.dto.loanapplication.NewLoanApplicationDto;
 import ru.hits.trb.trbloans.entity.LoanApplicationEntity;
@@ -21,7 +21,6 @@ import ru.hits.trb.trbloans.entity.enumeration.LoanState;
 import ru.hits.trb.trbloans.exception.ConflictException;
 import ru.hits.trb.trbloans.exception.NotFoundException;
 import ru.hits.trb.trbloans.mapper.LoanApplicationMapper;
-import ru.hits.trb.trbloans.mapper.LoanMapper;
 import ru.hits.trb.trbloans.producer.LoanPaymentProducer;
 import ru.hits.trb.trbloans.repository.LoanApplicationRepository;
 import ru.hits.trb.trbloans.repository.LoanRepaymentRepository;
@@ -43,7 +42,6 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
     private final LoanRepository loanRepository;
     private final LoanRepaymentRepository loanRepaymentRepository;
     private final LoanApplicationMapper loanApplicationMapper;
-    private final LoanMapper loanMapper;
     private final TariffService tariffService;
     private final UsersClient usersClient;
     private final CoreClient coreClient;
@@ -61,12 +59,12 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     @Override
     @Transactional
-    public LoanDto approveLoanApplication(UUID loanApplicationId, UUID officerId) {
-        var loanApplication = findLoanApplicationForAction(loanApplicationId);
+    public LoanApplicationDto approveLoanApplication(DecideForApplicationDto decideForApplicationDto) {
+        var loanApplication = findLoanApplicationForAction(decideForApplicationDto.getLoanApplicationId());
 
         loanApplication.setState(LoanApplicationState.APPROVED);
         loanApplication.setUpdatedDateFinal(new Date());
-        loanApplication.setOfficerId(officerId);
+        loanApplication.setOfficerId(decideForApplicationDto.getOfficerId());
 
         var clientDto = usersClient.getClient(loanApplication.getClientId());
         var accountDto = coreClient.createLoanAccount(clientDto.getId(),
@@ -89,15 +87,15 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
         loanPaymentProducer.sendMessage(loan.getId(), paymentTransaction);
 
-        return loanMapper.entityToDto(loan);
+        return loanApplicationMapper.mapEntityToDto(loanApplication);
     }
 
     @Override
     @Transactional
-    public LoanApplicationDto rejectLoanApplication(UUID loanApplicationId, UUID officerId) {
-        var loanApplication = findLoanApplicationForAction(loanApplicationId);
+    public LoanApplicationDto rejectLoanApplication(DecideForApplicationDto decideForApplicationDto) {
+        var loanApplication = findLoanApplicationForAction(decideForApplicationDto.getLoanApplicationId());
         loanApplication.setState(LoanApplicationState.REJECTED);
-        loanApplication.setOfficerId(officerId);
+        loanApplication.setOfficerId(decideForApplicationDto.getOfficerId());
         loanApplication.setUpdatedDateFinal(new Date());
 
         return loanApplicationMapper.mapEntityToDto(loanApplicationRepository.save(loanApplication));
