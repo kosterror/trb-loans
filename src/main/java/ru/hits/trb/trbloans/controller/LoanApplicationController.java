@@ -27,14 +27,18 @@ public class LoanApplicationController {
     }
 
     @Operation(summary = "Одобрить заявку на кредит")
-    @PostMapping("/{id}/approve")
-    public LoanApplicationDto approveLoanApplication(@Valid @RequestBody DecideForApplicationDto decideForApplicationDto) {
+    @PostMapping("/approve")
+    public LoanApplicationDto approveLoanApplication(
+            @Valid @RequestBody DecideForApplicationDto decideForApplicationDto
+    ) {
         return service.approveLoanApplication(decideForApplicationDto);
     }
 
     @Operation(summary = "Отклонить заявку на кредит")
-    @PostMapping("/{id}/reject")
-    public LoanApplicationDto rejectLoanApplication(@Valid @RequestBody DecideForApplicationDto decideForApplicationDto) {
+    @PostMapping("/reject")
+    public LoanApplicationDto rejectLoanApplication(
+            @Valid @RequestBody DecideForApplicationDto decideForApplicationDto
+    ) {
         return service.rejectLoanApplication(decideForApplicationDto);
     }
 
