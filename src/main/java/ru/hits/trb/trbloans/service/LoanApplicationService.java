@@ -19,4 +19,5 @@ public interface LoanApplicationService {
     List<LoanApplicationDto> getClientLoanApplications(UUID clientId, LoanApplicationState loanApplicationState);
 
     List<LoanApplicationDto> getLoanApplications(LoanApplicationState loanApplicationState);
+    LoanApplicationDto getLoanApplication(UUID loanApplicationId);
 }

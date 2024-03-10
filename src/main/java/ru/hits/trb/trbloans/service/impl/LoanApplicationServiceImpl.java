@@ -123,6 +123,12 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
                 .toList();
     }
 
+    @Override
+    @Transactional
+    public LoanApplicationDto getLoanApplication(UUID loanApplicationId) {
+        return loanApplicationMapper.mapEntityToDto(findLoanApplication(loanApplicationId));
+    }
+
     private LoanApplicationEntity findLoanApplicationForAction(UUID id) {
         var loanApplication = findLoanApplication(id);
 
