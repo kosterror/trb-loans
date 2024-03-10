@@ -23,6 +23,7 @@ public class LoanController {
     @Operation(summary = "Получить кредиты клиента")
     @GetMapping
     public List<LoanDto> getClientLoans(@Valid @RequestParam UUID clientId) {
+
         return loanService.getLoans(clientId);
     }
 
