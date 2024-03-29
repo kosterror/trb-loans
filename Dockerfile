@@ -7,4 +7,4 @@ FROM openjdk:21
 RUN mkdir /app
 COPY --from=build /src/build/libs/trb-loans-0.0.1.jar /app/trb-loans-0.0.1.jar
 
-ENTRYPOINT ["java", "-jar","/app/trb-loans-0.0.1.jar"]
+ENTRYPOINT ["java", "--enable-preview", "-jar", "/app/trb-loans-0.0.1.jar"]
