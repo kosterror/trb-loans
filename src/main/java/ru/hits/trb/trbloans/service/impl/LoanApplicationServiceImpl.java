@@ -8,10 +8,11 @@ import ru.hits.trb.trbloans.client.core.CoreClient;
 import ru.hits.trb.trbloans.client.core.dto.AccountDto;
 import ru.hits.trb.trbloans.client.users.UsersClient;
 import ru.hits.trb.trbloans.client.users.dto.ClientDto;
-import ru.hits.trb.trbloans.dto.UnidirectionalTransactionDto;
-import ru.hits.trb.trbloans.dto.loanapplication.DecideForApplicationDto;
+import ru.hits.trb.trbloans.dto.loanapplication.LoanApplicationDecisionDto;
 import ru.hits.trb.trbloans.dto.loanapplication.LoanApplicationDto;
 import ru.hits.trb.trbloans.dto.loanapplication.NewLoanApplicationDto;
+import ru.hits.trb.trbloans.dto.transaction.InitTransactionDto;
+import ru.hits.trb.trbloans.dto.transaction.TransactionType;
 import ru.hits.trb.trbloans.entity.LoanApplicationEntity;
 import ru.hits.trb.trbloans.entity.LoanEntity;
 import ru.hits.trb.trbloans.entity.LoanRepaymentEntity;
@@ -21,7 +22,7 @@ import ru.hits.trb.trbloans.entity.enumeration.LoanState;
 import ru.hits.trb.trbloans.exception.ConflictException;
 import ru.hits.trb.trbloans.exception.NotFoundException;
 import ru.hits.trb.trbloans.mapper.LoanApplicationMapper;
-import ru.hits.trb.trbloans.producer.LoanPaymentProducer;
+import ru.hits.trb.trbloans.producer.TransactionProducer;
 import ru.hits.trb.trbloans.repository.LoanApplicationRepository;
 import ru.hits.trb.trbloans.repository.LoanRepaymentRepository;
 import ru.hits.trb.trbloans.repository.LoanRepository;
@@ -45,7 +46,7 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
     private final TariffService tariffService;
     private final UsersClient usersClient;
     private final CoreClient coreClient;
-    private final LoanPaymentProducer loanPaymentProducer;
+    private final TransactionProducer transactionProducer;
 
     @Override
     @Transactional
@@ -59,18 +60,20 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     @Override
     @Transactional
-    public LoanApplicationDto approveLoanApplication(DecideForApplicationDto decideForApplicationDto) {
-        var loanApplication = findLoanApplicationForAction(decideForApplicationDto.getLoanApplicationId());
+    public LoanApplicationDto approveLoanApplication(LoanApplicationDecisionDto loanApplicationDecisionDto) {
+        var loanApplication = findLoanApplicationForAction(loanApplicationDecisionDto.getLoanApplicationId());
 
         loanApplication.setState(LoanApplicationState.APPROVED);
         loanApplication.setUpdatedDateFinal(new Date());
-        loanApplication.setOfficerId(decideForApplicationDto.getOfficerId());
+        loanApplication.setOfficerId(loanApplicationDecisionDto.getOfficerId());
 
         var clientDto = usersClient.getClient(loanApplication.getClientId());
-        var accountDto = coreClient.createLoanAccount(clientDto.getId(),
+        var accountDto = coreClient.createLoanAccount(
+                clientDto.getId(),
                 clientDto.getFirstName(),
                 clientDto.getLastName(),
-                clientDto.getPatronymic()
+                clientDto.getPatronymic(),
+                loanApplication.getCurrency()
         );
 
         var loan = buildLoanEntity(loanApplication, clientDto, accountDto);
@@ -80,22 +83,24 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
         loanRepaymentRepository.saveAll(repayments);
 
-        var paymentTransaction = UnidirectionalTransactionDto.builder()
-                .accountId(loan.getAccountId())
+        var paymentTransaction = InitTransactionDto.builder()
+                .payeeAccountId(loan.getAccountId())
                 .amount(loan.getIssuedAmount())
+                .currency(accountDto.getCurrency())
+                .type(TransactionType.LOAN_PAYMENT)
                 .build();
 
-        loanPaymentProducer.sendMessage(loan.getId(), paymentTransaction);
+        transactionProducer.sendMessage(loan.getId(), paymentTransaction);
 
         return loanApplicationMapper.mapEntityToDto(loanApplication);
     }
 
     @Override
     @Transactional
-    public LoanApplicationDto rejectLoanApplication(DecideForApplicationDto decideForApplicationDto) {
-        var loanApplication = findLoanApplicationForAction(decideForApplicationDto.getLoanApplicationId());
+    public LoanApplicationDto rejectLoanApplication(LoanApplicationDecisionDto loanApplicationDecisionDto) {
+        var loanApplication = findLoanApplicationForAction(loanApplicationDecisionDto.getLoanApplicationId());
         loanApplication.setState(LoanApplicationState.REJECTED);
-        loanApplication.setOfficerId(decideForApplicationDto.getOfficerId());
+        loanApplication.setOfficerId(loanApplicationDecisionDto.getOfficerId());
         loanApplication.setUpdatedDateFinal(new Date());
 
         return loanApplicationMapper.mapEntityToDto(loanApplicationRepository.save(loanApplication));
@@ -131,7 +136,7 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
         var loanApplication = findLoanApplication(id);
 
         if (loanApplication.getState() != LoanApplicationState.UNDER_CONSIDERATION) {
-            throw new ConflictException("Invalid loan application state for action, it must be UNDER_CONSIDERATION'");
+            throw new ConflictException(STR."Invalid loan application state for action, it must be \{LoanApplicationState.UNDER_CONSIDERATION}");
         }
 
         return loanApplication;
@@ -139,7 +144,7 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     private LoanApplicationEntity findLoanApplication(UUID id) {
         return loanApplicationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("LoanApplication with id '" + id + "' not found"));
+                .orElseThrow(() -> new NotFoundException(STR."LoanApplication with id \{id} not found"));
     }
 
     private LoanEntity buildLoanEntity(LoanApplicationEntity loanApplication,
@@ -151,9 +156,9 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
                 .divide(BigDecimal.valueOf(100), RoundingMode.DOWN);
         var issuedAmount = loanApplication.getIssuedAmount();
         var amountLoan = interestRate
-                .multiply(BigDecimal.valueOf(issuedAmount))
+                .multiply(issuedAmount)
                 .multiply(BigDecimal.valueOf(loanApplication.getLoanTermInDays()))
-                .add(BigDecimal.valueOf(issuedAmount));
+                .add(issuedAmount);
 
         var issuedDate = new Date();
         var calendar = Calendar.getInstance();
@@ -165,9 +170,10 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
                 .issuedDate(issuedDate)
                 .repaymentDate(repaymentDate)
                 .issuedAmount(loanApplication.getIssuedAmount())
-                .amountLoan(amountLoan.longValue())
-                .amountDebt(amountLoan.longValue())
-                .accruedPenny(0)
+                .amountLoan(amountLoan)
+                .amountDebt(amountLoan)
+                .accruedPenny(BigDecimal.ZERO)
+                .currency(loanApplication.getCurrency())
                 .loanTermInDays(loanApplication.getLoanTermInDays())
                 .clientId(clientDto.getId())
                 .accountId(accountDto.getId())
@@ -179,7 +185,8 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     private List<LoanRepaymentEntity> buildRepayments(LoanEntity loan) {
         var loanRepayments = new ArrayList<LoanRepaymentEntity>();
-        var repaymentAmount = loan.getAmountLoan() / loan.getLoanTermInDays();
+        var repaymentAmount = loan.getAmountLoan()
+                .divide(BigDecimal.valueOf(loan.getLoanTermInDays()), RoundingMode.DOWN);
 
         var calendar = Calendar.getInstance();
         calendar.setTime(loan.getIssuedDate());
@@ -190,6 +197,7 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
             var loanRepayment = LoanRepaymentEntity.builder()
                     .date(repaymentDate)
                     .amount(repaymentAmount)
+                    .currency(loan.getCurrency())
                     .state(LoanRepaymentState.OPEN)
                     .loan(loan)
                     .build();

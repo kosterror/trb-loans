@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public interface RepaymentService {
 
-    void processRepaymentCallback(UUID repaymentId, TransactionState state);
+    void processRepaymentCallback(UUID internalTransactionId, TransactionState state);
 
     void sendRepaymentTransactions();
 

@@ -27,15 +27,16 @@ spring:
 
 kafka:
   topic:
-    loan-repayment: "transaction.loan-repayment"
-    loan-payment: "transaction.loan-payment"
-    loan-repayment-callback: "transaction.loan-repayment-callback"
-
+    consumer:
+      loan-payment-callback: "transaction.loan.payment-callback"
+      loan-repayment-callback: "transaction.loan.repayment-callback"
+    producer:
+      transaction-initialization: "transaction.initialization"
 urls:
   core: ${CORE_URL}
   users: ${USERS_URL}
 
 scheduler:
-  loan-repayment-send-transaction: "0 0 18 * * *"
-  loan-repayment-update-status: "0 0 */6 * * *"
-  loan-repayment-calculate-penny: "0 0 1 * * *"
+  loan-repayment-send-transaction: ${REPAYMENT_TRANSACTION_CRON:0 0 18 * * *}
+  loan-repayment-update-status: ${REPAYMENT_UPDATE_STATUS_CRON:0 0 */6 * * *}
+  loan-repayment-calculate-penny: ${REPAYMENT_CALCULATE_PENNY_CRON:0 0 1 * * *}

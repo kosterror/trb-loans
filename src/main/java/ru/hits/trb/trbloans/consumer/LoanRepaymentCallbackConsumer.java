@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LoanRepaymentCallbackConsumer {
 
-    private static final String TOPIC = "${kafka.topic.loan-repayment-callback}";
+    private static final String TOPIC = "${kafka.topic.consumer.loan-repayment-callback}";
     private static final String GROUP_ID = "${spring.kafka.consumer.group-id}";
 
     private final ObjectMapper mapper;
@@ -31,12 +31,12 @@ public class LoanRepaymentCallbackConsumer {
                                          @Payload String message) {
         try {
             var transactionState = mapper.readValue(message, TransactionState.class);
-            var loanRepaymentId = mapper.readValue(key, UUID.class);
+            var internalTransactionId = mapper.readValue(key, UUID.class);
 
-            log.info("repayment id: {}, state: {}", loanRepaymentId, transactionState);
-            repaymentService.processRepaymentCallback(loanRepaymentId, transactionState);
+            log.info("Internal transaction id: {}, state: {}", internalTransactionId, transactionState);
+            repaymentService.processRepaymentCallback(internalTransactionId, transactionState);
         } catch (JsonProcessingException exception) {
-            throw new InternalServiceException("Failed to deserialize message: " + message, exception);
+            throw new InternalServiceException(STR."Failed to deserialize key '\{key}' or message '\{message}'");
         }
     }
 

@@ -5,9 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.hits.trb.trbloans.entity.enumeration.Currency;
 import ru.hits.trb.trbloans.entity.enumeration.LoanRepaymentState;
 
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -26,12 +29,20 @@ public class LoanRepaymentEntity {
 
     private Date dateOfLastTransaction;
 
-    private long amount;
+    private BigDecimal amount;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
+
+    @Enumerated(EnumType.STRING)
     private LoanRepaymentState state;
 
     @ManyToOne
     private LoanEntity loan;
+
+    @Column(name = "transaction_id")
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "internal_transaction_ids", joinColumns = @JoinColumn(name = "loan_repayment_id"))
+    private List<UUID> internalTransactionIds;
 
 }

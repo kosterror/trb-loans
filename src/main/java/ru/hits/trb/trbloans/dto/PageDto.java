@@ -1,19 +1,15 @@
 package ru.hits.trb.trbloans.dto;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.hits.trb.trbloans.annotation.PageNumberValidation;
-import ru.hits.trb.trbloans.annotation.PageSizeValidation;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 public class PageDto {
 
-    @PageNumberValidation
+    @Min(value = 0)
     private int pageNumber;
 
-    @PageSizeValidation
+    @Min(value = 1)
+    @Min(value = 200)
     private int pageSize;
 }

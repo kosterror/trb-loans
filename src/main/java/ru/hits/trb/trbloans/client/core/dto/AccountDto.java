@@ -1,7 +1,9 @@
 package ru.hits.trb.trbloans.client.core.dto;
 
 import lombok.Data;
+import ru.hits.trb.trbloans.entity.enumeration.Currency;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -12,7 +14,11 @@ public class AccountDto {
 
     private AccountType type;
 
-    private long balance;
+    private UUID loanId;
+
+    private BigDecimal balance;
+
+    private Currency currency;
 
     private String clientFullName;
 

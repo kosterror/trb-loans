@@ -4,17 +4,18 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hits.trb.trbloans.dto.UnidirectionalTransactionDto;
+import ru.hits.trb.trbloans.dto.transaction.InitTransactionDto;
 import ru.hits.trb.trbloans.dto.transaction.TransactionState;
+import ru.hits.trb.trbloans.dto.transaction.TransactionType;
 import ru.hits.trb.trbloans.entity.LoanEntity;
 import ru.hits.trb.trbloans.entity.LoanRepaymentEntity;
 import ru.hits.trb.trbloans.entity.enumeration.LoanRepaymentState;
 import ru.hits.trb.trbloans.entity.enumeration.LoanState;
-import ru.hits.trb.trbloans.exception.ConflictException;
-import ru.hits.trb.trbloans.exception.NotFoundException;
-import ru.hits.trb.trbloans.producer.LoanRepaymentProducer;
+import ru.hits.trb.trbloans.exception.InternalServiceException;
+import ru.hits.trb.trbloans.producer.TransactionProducer;
 import ru.hits.trb.trbloans.repository.LoanRepaymentRepository;
 import ru.hits.trb.trbloans.repository.LoanRepository;
 import ru.hits.trb.trbloans.service.RepaymentService;
@@ -31,15 +32,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RepaymentServiceImpl implements RepaymentService {
 
+    private static final List<LoanRepaymentState> STATES_FOR_REPAYMENT = List.of(
+            LoanRepaymentState.OPEN,
+            LoanRepaymentState.REJECTED
+    );
+
     private final LoanRepaymentRepository repaymentRepository;
-    private final LoanRepaymentProducer loanRepaymentProducer;
+    private final TransactionProducer transactionProducer;
     private final LoanRepository loanRepository;
     private final EntityManager entityManager;
 
     @Override
     @Transactional
-    public void processRepaymentCallback(UUID repaymentId, TransactionState state) {
-        var loanRepayment = getLoanRepayment(repaymentId);
+    public void processRepaymentCallback(UUID internalTransactionId, TransactionState state) {
+        var loanRepayment = findLoanRepaymentByInternalTransactionId(internalTransactionId);
 
         if (state == TransactionState.DONE) {
             processSuccessRepaymentCallback(loanRepayment);
@@ -48,14 +54,31 @@ public class RepaymentServiceImpl implements RepaymentService {
         }
     }
 
+    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     @Override
     public void sendRepaymentTransactions() {
         var toDate = DateUtil.getStartNextDate();
-        var repayments = repaymentRepository.findOpenAndRejectedRepaymentsToDate(toDate);
+        var repayments = repaymentRepository.findAllByStateInAndDateLessThanEqual(STATES_FOR_REPAYMENT, toDate);
 
         for (var repayment : repayments) {
-            updateRepayment(repayment);
+            processRepayment(repayment);
         }
+    }
+
+    @Transactional
+    protected void processRepayment(LoanRepaymentEntity repayment) {
+        var internalTransactionId = UUID.randomUUID();
+
+        var updatedRepayment = updateRepayment(repayment, internalTransactionId);
+
+        var transaction = InitTransactionDto.builder()
+                .payerAccountId(updatedRepayment.getLoan().getAccountId())
+                .amount(updatedRepayment.getAmount())
+                .type(TransactionType.LOAN_REPAYMENT)
+                .currency(repayment.getCurrency())
+                .build();
+
+        transactionProducer.sendMessage(internalTransactionId, transaction);
     }
 
     @Override
@@ -87,9 +110,8 @@ public class RepaymentServiceImpl implements RepaymentService {
 
             for (var rejectedRepayment : repaymentsForPenny) {
                 penny += interestRate
-                        .multiply(BigDecimal.valueOf(rejectedRepayment.getAmount())
-                                .divide(BigDecimal.valueOf(100), RoundingMode.DOWN)
-                        ).longValue();
+                        .multiply(rejectedRepayment.getAmount().divide(BigDecimal.valueOf(100), RoundingMode.DOWN))
+                        .longValue();
                 log.info("current penny: {}", penny);
             }
 
@@ -101,9 +123,11 @@ public class RepaymentServiceImpl implements RepaymentService {
             var appendixToNotClosedRepayment = penny / futureRepaymentCount;
             log.info("appendix {}", appendixToNotClosedRepayment);
 
-            loan.setAmountDebt(loan.getAmountDebt() + appendixToNotClosedRepayment * futureRepaymentCount);
-            loan.setAmountLoan(loan.getIssuedAmount() + loan.getAmountDebt());
-            loan.setAccruedPenny(loan.getAccruedPenny() + penny);
+            loan.setAmountDebt(loan.getAmountDebt()
+                    .add(BigDecimal.valueOf(appendixToNotClosedRepayment * futureRepaymentCount))
+            );
+            loan.setAmountLoan(loan.getIssuedAmount().add(loan.getAmountDebt()));
+            loan.setAccruedPenny(loan.getAccruedPenny().add(BigDecimal.valueOf(penny)));
 
             var repaymentsToRecalculateAmount = repayments.stream()
                     .filter(r -> r.getState() != LoanRepaymentState.DONE
@@ -111,7 +135,7 @@ public class RepaymentServiceImpl implements RepaymentService {
                     .toList();
 
             for (var repayment : repaymentsToRecalculateAmount) {
-                repayment.setAmount(repayment.getAmount() + appendixToNotClosedRepayment);
+                repayment.setAmount(repayment.getAmount().add(BigDecimal.valueOf(appendixToNotClosedRepayment)));
             }
         }
 
@@ -138,17 +162,19 @@ public class RepaymentServiceImpl implements RepaymentService {
         return entityManager.createQuery(criteriaQuery).getResultList();
     }
 
-    private void updateRepayment(LoanRepaymentEntity repayment) {
-        var transaction = UnidirectionalTransactionDto.builder()
-                .accountId(repayment.getLoan().getAccountId())
-                .amount(repayment.getAmount())
-                .build();
+    private LoanRepaymentEntity updateRepayment(LoanRepaymentEntity repayment, UUID internalTransactionId) {
+        var freshRepayment = repaymentRepository
+                .findById(repayment.getId())
+                .orElseThrow(() -> new InternalServiceException(
+                                STR."LoanRepaymentEntity with id = \{repayment.getId()} not found"
+                        )
+                );
 
-        repayment.setDateOfLastTransaction(new Date());
-        repayment.setState(LoanRepaymentState.IN_PROGRESS);
+        freshRepayment.setDateOfLastTransaction(new Date());
+        freshRepayment.setState(LoanRepaymentState.IN_PROGRESS);
+        freshRepayment.getInternalTransactionIds().add(internalTransactionId);
 
-        repaymentRepository.save(repayment);
-        loanRepaymentProducer.sendMessage(repayment.getId(), transaction);
+        return repaymentRepository.save(freshRepayment);
     }
 
     private void processSuccessRepaymentCallback(LoanRepaymentEntity loanRepayment) {
@@ -166,8 +192,8 @@ public class RepaymentServiceImpl implements RepaymentService {
             log.info("Loan {} closed", loan.getId());
         }
 
-        loan.setAmountDebt(loan.getAmountDebt() - loanRepayment.getAmount());
-        loan.setAmountLoan(loan.getIssuedAmount() + loan.getAmountDebt());
+        loan.setAmountDebt(loan.getAmountDebt().subtract(loanRepayment.getAmount()));
+        loan.setAmountLoan(loan.getIssuedAmount().add(loan.getAmountDebt()));
 
         repaymentRepository.save(loanRepayment);
     }
@@ -179,15 +205,20 @@ public class RepaymentServiceImpl implements RepaymentService {
         repaymentRepository.save(loanRepayment);
     }
 
-    private LoanRepaymentEntity getLoanRepayment(UUID repaymentId) {
-        var loanRepayment = repaymentRepository.findById(repaymentId)
-                .orElseThrow(() -> new NotFoundException("Loan repayment with id '" + repaymentId + "' not found"));
+    private LoanRepaymentEntity findLoanRepaymentByInternalTransactionId(UUID internalTransactionId) {
+        return repaymentRepository
+                .findOne(getLoanRepaymentByInternalTransactionIdSpecification(internalTransactionId))
+                .orElseThrow(() -> new InternalServiceException(
+                                STR."Repayment with internalTransactionId = \{internalTransactionId} not found"
+                        )
+                );
+    }
 
-        if (loanRepayment.getState() == LoanRepaymentState.DONE) {
-            throw new ConflictException("Repayment with id '" + repaymentId + "' is done");
-        }
-
-        return loanRepayment;
+    private Specification<LoanRepaymentEntity> getLoanRepaymentByInternalTransactionIdSpecification(UUID internalTransactionId) {
+        return (root, _, criteriaBuilder) -> {
+            Join<LoanRepaymentEntity, UUID> internalTransactionIdsJoin = root.join("internalTransactionIds");
+            return criteriaBuilder.equal(internalTransactionIdsJoin, internalTransactionId);
+        };
     }
 
 }

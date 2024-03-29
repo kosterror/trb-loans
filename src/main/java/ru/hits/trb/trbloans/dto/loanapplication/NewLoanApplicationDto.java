@@ -5,7 +5,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import ru.hits.trb.trbloans.entity.enumeration.Currency;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
@@ -28,7 +30,11 @@ public class NewLoanApplicationDto {
 
     @Min(10000)
     @Max(100000000000L)
-    @Schema(description = "Запрашиваемая сумма для кредита в копейках", requiredMode = REQUIRED)
-    private long issuedAmount;
+    @Schema(description = "Запрашиваемая сумма", requiredMode = REQUIRED)
+    private BigDecimal issuedAmount;
+
+    @NotNull
+    @Schema(description = "Валюта запрашиваемой суммы", requiredMode = REQUIRED)
+    private Currency currency;
 
 }

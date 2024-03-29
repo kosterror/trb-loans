@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.hits.trb.trbloans.dto.loanapplication.DecideForApplicationDto;
+import ru.hits.trb.trbloans.dto.loanapplication.LoanApplicationDecisionDto;
 import ru.hits.trb.trbloans.dto.loanapplication.LoanApplicationDto;
 import ru.hits.trb.trbloans.dto.loanapplication.NewLoanApplicationDto;
 import ru.hits.trb.trbloans.entity.enumeration.LoanApplicationState;
@@ -29,17 +29,17 @@ public class LoanApplicationController {
     @Operation(summary = "Одобрить заявку на кредит")
     @PostMapping("/approve")
     public LoanApplicationDto approveLoanApplication(
-            @Valid @RequestBody DecideForApplicationDto decideForApplicationDto
+            @Valid @RequestBody LoanApplicationDecisionDto loanApplicationDecisionDto
     ) {
-        return service.approveLoanApplication(decideForApplicationDto);
+        return service.approveLoanApplication(loanApplicationDecisionDto);
     }
 
     @Operation(summary = "Отклонить заявку на кредит")
     @PostMapping("/reject")
     public LoanApplicationDto rejectLoanApplication(
-            @Valid @RequestBody DecideForApplicationDto decideForApplicationDto
+            @Valid @RequestBody LoanApplicationDecisionDto loanApplicationDecisionDto
     ) {
-        return service.rejectLoanApplication(decideForApplicationDto);
+        return service.rejectLoanApplication(loanApplicationDecisionDto);
     }
 
     @Operation(summary = "Получить заявки клиента на кредит")
@@ -56,7 +56,7 @@ public class LoanApplicationController {
         return service.getLoanApplications(loanApplicationState);
     }
 
-    @Operation(summary = "Получить информацию по заявке.")
+    @Operation(summary = "Получить информацию по заявке")
     @GetMapping("{loanApplicationId}")
     public LoanApplicationDto getLoanApplications(@PathVariable UUID loanApplicationId) {
         return service.getLoanApplication(loanApplicationId);

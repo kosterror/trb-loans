@@ -2,6 +2,7 @@ package ru.hits.trb.trbloans.client.core.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.hits.trb.trbloans.entity.enumeration.Currency;
 
 import java.util.UUID;
 
@@ -10,6 +11,10 @@ import java.util.UUID;
 public class NewAccountDto {
 
     private AccountType type;
+
+    private UUID loanId;
+
+    private Currency currency;
 
     private String clientFullName;
 
