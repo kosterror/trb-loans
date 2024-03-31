@@ -2,6 +2,7 @@ package ru.hits.trb.trbloans.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import ru.hits.trb.trbloans.entity.LoanRepaymentEntity;
 import ru.hits.trb.trbloans.entity.enumeration.LoanRepaymentState;
 
@@ -16,6 +17,19 @@ public interface LoanRepaymentRepository extends JpaRepository<LoanRepaymentEnti
 
     List<LoanRepaymentEntity> findAllByDateOfLastTransactionIsBeforeAndState(Date toDate, LoanRepaymentState state);
 
-    List<LoanRepaymentEntity> findAllByDateBeforeAndStateIn(Date toDate, List<LoanRepaymentState> states);
+    @Query(value = """
+            select count (t.id) from (
+                select lr.id AS id
+                from LoanRepaymentEntity lr
+                left join lr.loan l
+                left join lr.internalTransactionIds iti
+                where l.clientId = :clientId
+                and lr.state = :loanRepaymentState
+                and lr.date > :dateFrom
+                group by lr.id
+                having count(lr.id) > 1
+            ) as t
+            """)
+    long countExpiredRepayments(UUID clientId, LoanRepaymentState loanRepaymentState, Date dateFrom);
 
 }

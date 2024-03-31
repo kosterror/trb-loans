@@ -12,8 +12,6 @@ public class NewAccountDto {
 
     private AccountType type;
 
-    private UUID loanId;
-
     private Currency currency;
 
     private String clientFullName;

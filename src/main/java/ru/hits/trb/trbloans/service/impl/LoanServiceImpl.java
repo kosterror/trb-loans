@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.hits.trb.trbloans.dto.PageDto;
 import ru.hits.trb.trbloans.dto.loan.LoanDto;
 import ru.hits.trb.trbloans.dto.loan.ShortLoanDto;
 import ru.hits.trb.trbloans.entity.LoanEntity;
@@ -38,9 +37,8 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public Page<ShortLoanDto> getLoans(PageDto pageDto) {
-
-        Pageable pageable = createPageable(pageDto);
+    public Page<ShortLoanDto> getLoans(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return loanRepository.findAllLoanEntitiesByState(pageable, LoanState.OPEN)
                 .map(loanMapper::entityToShortDto);
     }
@@ -48,14 +46,9 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanDto getLoan(UUID loanId) {
         LoanEntity loanEntity = loanRepository.findById(loanId)
-                .orElseThrow(() -> new NotFoundException("Loan with id '" + loanId + "' not found"));
+                .orElseThrow(() -> new NotFoundException(STR."Loan with id '\{loanId}' not found"));
 
         return loanMapper.entityToDto(loanEntity);
     }
 
-    private Pageable createPageable(PageDto pageDto) {
-        int page = pageDto.getPageNumber();
-        int size = pageDto.getPageSize();
-        return PageRequest.of(page, size);
-    }
 }

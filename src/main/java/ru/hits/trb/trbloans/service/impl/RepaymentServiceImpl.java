@@ -47,6 +47,10 @@ public class RepaymentServiceImpl implements RepaymentService {
     public void processRepaymentCallback(UUID internalTransactionId, TransactionState state) {
         var loanRepayment = findLoanRepaymentByInternalTransactionId(internalTransactionId);
 
+        if (loanRepayment.getState() == LoanRepaymentState.DONE) {
+            throw new InternalServiceException("Transaction was duplicated");
+        }
+
         if (state == TransactionState.DONE) {
             processSuccessRepaymentCallback(loanRepayment);
         } else {
