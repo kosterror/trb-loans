@@ -49,9 +49,7 @@ public class LoanPaymentServiceImpl implements LoanPaymentService {
 
     private void processSuccessPayment(LoanEntity loanEntity) {
         var repayments = buildRepayments(loanEntity);
-        loanEntity.setRepayments(repayments);
 
-        loanRepository.save(loanEntity);
         loanRepaymentRepository.saveAll(repayments);
     }
 
