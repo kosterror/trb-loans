@@ -28,7 +28,7 @@ public class NewLoanApplicationDto {
     @Schema(description = "Длительность кредита в днях", requiredMode = REQUIRED)
     private int loanTermInDays;
 
-    @Min(10000)
+    @Min(1)
     @Max(100000000000L)
     @Schema(description = "Запрашиваемая сумма", requiredMode = REQUIRED)
     private BigDecimal issuedAmount;
