@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import ru.hits.trb.trbloans.entity.LoanEntity;
 import ru.hits.trb.trbloans.entity.enumeration.LoanState;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,4 +18,6 @@ public interface LoanRepository extends JpaRepository<LoanEntity, UUID>, JpaSpec
     Page<LoanEntity> findAllLoanEntitiesByState(Pageable pageable, LoanState loanState);
 
     long countByClientIdAndState(UUID clientId, LoanState state);
+
+    List<LoanEntity> findLoanEntityByStateAndIssuedDateLessThanEqual(LoanState state, Date issuedDate);
 }

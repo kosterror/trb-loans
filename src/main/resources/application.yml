@@ -40,3 +40,4 @@ scheduler:
   loan-repayment-send-transaction: ${REPAYMENT_TRANSACTION_CRON:0 0 18 * * *}
   loan-repayment-update-status: ${REPAYMENT_UPDATE_STATUS_CRON:0 0 */6 * * *}
   loan-repayment-calculate-penny: ${REPAYMENT_CALCULATE_PENNY_CRON:0 0 1 * * *}
+  loan-state-update: ${LOAN_STATE_UPDATE_CRON:0 0 */1 * * *}

@@ -15,23 +15,23 @@ import ru.hits.trb.trbloans.dto.transaction.InitTransactionDto;
 import ru.hits.trb.trbloans.dto.transaction.TransactionType;
 import ru.hits.trb.trbloans.entity.LoanApplicationEntity;
 import ru.hits.trb.trbloans.entity.LoanEntity;
-import ru.hits.trb.trbloans.entity.LoanRepaymentEntity;
 import ru.hits.trb.trbloans.entity.enumeration.LoanApplicationState;
-import ru.hits.trb.trbloans.entity.enumeration.LoanRepaymentState;
 import ru.hits.trb.trbloans.entity.enumeration.LoanState;
 import ru.hits.trb.trbloans.exception.ConflictException;
 import ru.hits.trb.trbloans.exception.NotFoundException;
 import ru.hits.trb.trbloans.mapper.LoanApplicationMapper;
 import ru.hits.trb.trbloans.producer.TransactionProducer;
 import ru.hits.trb.trbloans.repository.LoanApplicationRepository;
-import ru.hits.trb.trbloans.repository.LoanRepaymentRepository;
 import ru.hits.trb.trbloans.repository.LoanRepository;
 import ru.hits.trb.trbloans.service.LoanApplicationService;
 import ru.hits.trb.trbloans.service.TariffService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 
 @Slf4j
@@ -41,7 +41,6 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     private final LoanApplicationRepository loanApplicationRepository;
     private final LoanRepository loanRepository;
-    private final LoanRepaymentRepository loanRepaymentRepository;
     private final LoanApplicationMapper loanApplicationMapper;
     private final TariffService tariffService;
     private final UsersClient usersClient;
@@ -77,11 +76,7 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
         );
 
         var loan = buildLoanEntity(loanApplication, clientDto, accountDto);
-        var repayments = buildRepayments(loan);
-        loan.setRepayments(repayments);
         loan = loanRepository.save(loan);
-
-        loanRepaymentRepository.saveAll(repayments);
 
         var paymentTransaction = InitTransactionDto.builder()
                 .payeeAccountId(loan.getAccountId())
@@ -177,35 +172,11 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
                 .loanTermInDays(loanApplication.getLoanTermInDays())
                 .clientId(clientDto.getId())
                 .accountId(accountDto.getId())
-                .state(LoanState.OPEN)
+                .state(LoanState.PENDING)
                 .tariff(loanApplication.getTariff())
                 .loanApplication(loanApplication)
                 .build();
     }
 
-    private List<LoanRepaymentEntity> buildRepayments(LoanEntity loan) {
-        var loanRepayments = new ArrayList<LoanRepaymentEntity>();
-        var repaymentAmount = loan.getAmountLoan()
-                .divide(BigDecimal.valueOf(loan.getLoanTermInDays()), RoundingMode.DOWN);
-
-        var calendar = Calendar.getInstance();
-        calendar.setTime(loan.getIssuedDate());
-
-        for (int i = 0; i < loan.getLoanTermInDays(); i++) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-            var repaymentDate = calendar.getTime();
-            var loanRepayment = LoanRepaymentEntity.builder()
-                    .date(repaymentDate)
-                    .amount(repaymentAmount)
-                    .currency(loan.getCurrency())
-                    .state(LoanRepaymentState.OPEN)
-                    .loan(loan)
-                    .build();
-
-            loanRepayments.add(loanRepayment);
-        }
-
-        return loanRepayments;
-    }
 
 }
