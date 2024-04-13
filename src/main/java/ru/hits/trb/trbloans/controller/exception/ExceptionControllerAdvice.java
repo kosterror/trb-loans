@@ -57,7 +57,7 @@ public class ExceptionControllerAdvice {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.Builder()
+                .body(ErrorResponse.builder()
                         .code(ErrorCodes.VALIDATION_ERROR)
                         .message("Validation error")
                         .requestValidationMessages(errors)
@@ -100,7 +100,7 @@ public class ExceptionControllerAdvice {
     }
 
     private ErrorResponse buildResponse(int code, String message) {
-        return ErrorResponse.Builder()
+        return ErrorResponse.builder()
                 .code(code)
                 .message(message)
                 .build();

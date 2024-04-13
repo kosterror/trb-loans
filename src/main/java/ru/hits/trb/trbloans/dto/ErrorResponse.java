@@ -11,7 +11,7 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.NOT_REQUIR
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 @Data
-@Builder(builderMethodName = "Builder")
+@Builder
 public class ErrorResponse {
 
     @Schema(requiredMode = REQUIRED, description = "Задекларированный код ошибки")
