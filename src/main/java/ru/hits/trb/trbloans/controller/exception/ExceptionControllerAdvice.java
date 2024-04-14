@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import ru.hits.trb.trbloans.dto.ErrorResponse;
 import ru.hits.trb.trbloans.exception.BadRequestException;
 import ru.hits.trb.trbloans.exception.ConflictException;
@@ -63,6 +64,12 @@ public class ExceptionControllerAdvice {
                         .requestValidationMessages(errors)
                         .build()
                 );
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFound(NoResourceFoundException exception)
+            throws NoResourceFoundException {
+        throw exception;
     }
 
     @ExceptionHandler(BadRequestException.class)
