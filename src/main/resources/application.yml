@@ -43,7 +43,7 @@ scheduler:
   loan-state-update: ${LOAN_STATE_UPDATE_CRON:0 0 */1 * * *}
 
 random-error:
-  is-enable: true
+  is-enable: ${RANDOM_ERROR_IS_ENABLE:true}
   probability-average: 0.5
   probability-extreme: 0.9
   extreme-period-duration-min: 1
