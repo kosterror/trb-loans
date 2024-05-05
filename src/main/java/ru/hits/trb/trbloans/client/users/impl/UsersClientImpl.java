@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 import ru.hits.trb.trbloans.client.users.UsersClient;
 import ru.hits.trb.trbloans.client.users.dto.ClientDto;
@@ -26,7 +28,9 @@ public class UsersClientImpl implements UsersClient, RestClient.ResponseSpec.Err
     }
 
     @Override
+    @Retryable(retryFor = HttpServerErrorException.class, maxAttempts = 15)
     public ClientDto getClient(UUID clientId) {
+        log.info("Getting client info...");
         var responseEntityClientDto = restClient.get()
                 .uri(builder -> builder.path(Paths.GET_CLIENT_INFO)
                         .queryParam(Params.CLIENT_ID, clientId)
@@ -34,6 +38,8 @@ public class UsersClientImpl implements UsersClient, RestClient.ResponseSpec.Err
                 ).retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, this)
                 .toEntity(ClientDto.class);
+
+        log.info("Client info received");
 
         return responseEntityClientDto.getBody();
     }

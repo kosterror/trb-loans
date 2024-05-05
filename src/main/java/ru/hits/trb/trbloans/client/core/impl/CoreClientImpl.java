@@ -2,7 +2,9 @@ package ru.hits.trb.trbloans.client.core.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 import ru.hits.trb.trbloans.client.core.CoreClient;
 import ru.hits.trb.trbloans.client.core.dto.AccountDto;
@@ -24,6 +26,7 @@ public class CoreClientImpl implements CoreClient {
     }
 
     @Override
+    @Retryable(retryFor = HttpServerErrorException.class, maxAttempts = 15)
     public AccountDto createLoanAccount(UUID clientId,
                                         String clientName,
                                         String clientFullName,
